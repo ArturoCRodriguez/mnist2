@@ -30,4 +30,5 @@ for train_index, test_index in split.split(housing, housing["income_cat"]):
 # print(strat_train_set["income_cat"].value_counts() / len(strat_train_set))
 for set_ in (strat_train_set, strat_test_set):
     set_.drop("income_cat", axis=1, inplace=True)
-print(strat_train_set.describe())
+# print(strat_train_set.describe())
+housing = strat_train_set.copy()
