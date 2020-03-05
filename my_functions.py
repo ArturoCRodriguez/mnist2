@@ -15,3 +15,11 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
             return np.c_[X, rooms_per_household, population_per_household,bedrooms_per_room]
         else:
             return np.c_[X, rooms_per_household, population_per_household]
+
+class DropColumns(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self 
+    def transform(self, X, y=None):
+        X.drop(["Date","DiaMes","Objetivo","Tmin","Tmax","EsDiaLaboral"],axis=1, inplace = True)
+        return X
+        

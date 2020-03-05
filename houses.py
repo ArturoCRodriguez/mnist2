@@ -14,6 +14,9 @@ from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import GridSearchCV
 
 def split_train_test(data,test_ratio):
     shuffled_indices = np.random.permutation(len(data))
@@ -98,9 +101,43 @@ lin_reg.fit(housing_prepared, housing_labels)
 # lin_rmse = np.sqrt(lin_mse)
 # print(lin_rmse)
 
-tree_reg = DecisionTreeRegressor()
-tree_reg.fit(housing_prepared, housing_labels)
-housing_predictions = tree_reg.predict(housing_prepared)
-tree_mse = mean_squared_error(housing_labels, housing_predictions)
-tree_rmse = np.sqrt(tree_mse)
-print(tree_rmse)
+# tree_reg = DecisionTreeRegressor()
+# tree_reg.fit(housing_prepared, housing_labels)
+# housing_predictions = tree_reg.predict(housing_prepared)
+# tree_mse = mean_squared_error(housing_labels, housing_predictions)
+# tree_rmse = np.sqrt(tree_mse)
+# print("Error:",tree_rmse)
+# scores = cross_val_score(tree_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+# tree_rmse_scores = np.sqrt(-scores)
+# print(tree_rmse_scores)
+
+# forest_reg = RandomForestRegressor()
+# forest_reg.fit(housing_prepared, housing_labels)
+# housing_predictions = forest_reg.predict(housing_prepared)
+# tree_mse = mean_squared_error(housing_labels, housing_predictions)
+# tree_rmse = np.sqrt(tree_mse)
+# print("Error: ",tree_rmse)
+# scores = cross_val_score(forest_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+# tree_rmse_scores = np.sqrt(-scores)
+# print(tree_rmse_scores)
+
+param_grid = [
+{'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
+{'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
+]
+forest_reg = RandomForestRegressor()
+grid_search = GridSearchCV(forest_reg, param_grid,cv=5, scoring='neg_mean_squared_error', return_train_score=True)
+grid_search.fit(housing_prepared,housing_labels)
+cvres = grid_search.cv_results_
+for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
+    print(np.sqrt(-mean_score), params)
+print("Best:", grid_search.best_params_)
+
+final_model = grid_search.best_estimator_
+X_test = strat_test_set.drop("median_house_value",axis=1)
+y_test = strat_test_set["median_house_value"].copy()
+X_test_prepared = full_pipeline.transform(X_test)
+final_predictions = final_model.predict(X_test_prepared)
+final_mse = mean_squared_error(y_test, final_predictions)
+final_rmse = np.sqrt(final_mse)
+print(final_rmse)
