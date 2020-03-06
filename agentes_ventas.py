@@ -9,8 +9,10 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import OneHotEncoder
 from my_functions import DropColumns
+from my_functions import MakeCategorical
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
@@ -53,15 +55,22 @@ ventas_labels.isna().any()
 num_pipeline = Pipeline([
     ('attribs_adder', DropColumns()),
     ('imputer', SimpleImputer(strategy="median")),
-    ('std_scaler',StandardScaler()),
+    ('categ',MakeCategorical()),
+    ('std_scaler',RobustScaler()),
 ])
-ventas_prepared = num_pipeline.fit_transform(ventas)
+attribs = ["BKAgente","Mes","Dia","DiaSemana","DiaAnio"]
+
+full_pipeline = ColumnTransformer([    
+    # ("num",num_pipeline,ventas.columns),    
+    ("cat",OneHotEncoder(),attribs),    
+])
+ventas_prepared = full_pipeline.fit_transform(ventas)
 #%%
 # np.isnan(ventas_prepared).any()
 # type(ventas_labels)
 ventas_labels.isna()
 #%%
-final_model = RandomForestRegressor(n_estimators=2000, max_features=48, verbose=10, n_jobs=4)
+final_model = RandomForestRegressor(n_estimators=500, max_features=48, verbose=10, n_jobs=8)
 final_model.fit(ventas_prepared, ventas_labels)
 ventas_predictions = final_model.predict(ventas_prepared)
 tree_mse = mean_squared_error(ventas_labels, ventas_predictions)

@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import OneHotEncoder
 
 rooms_ix, bedrooms_ix, population_ix, households_ix = 3, 4, 5, 6
 class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
@@ -22,4 +23,13 @@ class DropColumns(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         X.drop(["Date","DiaMes","Objetivo","Tmin","Tmax","EsDiaLaboral"],axis=1, inplace = True)
         return X
+class MakeCategorical(BaseEstimator, TransformerMixin):
+    def fit(self, X, y = None):
+        return self
+    def transform(self, X, y = None):
+        attribs = ["BKAgente","Mes","Dia","DiaSemana","DiaAnio"]
+        encoder = OneHotEncoder(categories='auto')        
+        return encoder.fit_transform(X)
+    
+
         
