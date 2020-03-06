@@ -1,4 +1,3 @@
-#%%
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,38 +19,33 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
-#%%
+from sklearn.neural_network import MLPRegressor
+from sklearn.svm import SVR
 ventas = pd.read_csv("AgentesVentas8.csv")
 ventas.dropna(inplace=True)
 ventas = ventas.loc[ventas["MediaVisitasMismoDiaU10"] > 0,:]
 ventas["ventas_cat"] = pd.cut(ventas["MediaVentasMismoDiaU10"],bins= 10, labels=[1,2,3,4,5,6,7,8,9,10])
-
-# print(ventas["ventas_cat"])
-# ventas["ventas_cat"].hist()
-# plt.show()
-
-#%%
 
 split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
 for train_index, test_index in split.split(ventas,ventas["ventas_cat"]):
     strat_train_set = ventas.iloc[train_index]
     strat_test_set = ventas.iloc[test_index]
 strat_test_set.loc[strat_test_set["Ventas"].isna(),:]
-#%%
+
 for set_ in (strat_train_set,strat_test_set):
     set_.drop("ventas_cat",axis=1, inplace=True)
 
 ventas = strat_train_set.copy()
 ventas = ventas.drop("Ventas",axis=1)
 ventas_labels = strat_train_set["Ventas"].copy()
-#%%
+
 strat_train_set.loc[strat_train_set["Ventas"].isna(),:]
 # print(ventas.shape)
 # print(ventas_labels.shape)
-#%%
+
 ventas_labels.isna().any()
 
-#%%
+
 num_pipeline = Pipeline([
     ('attribs_adder', DropColumns()),
     ('imputer', SimpleImputer(strategy="median")),
@@ -65,12 +59,12 @@ full_pipeline = ColumnTransformer([
     ("cat",OneHotEncoder(),attribs),    
 ])
 ventas_prepared = full_pipeline.fit_transform(ventas)
-#%%
+
 # np.isnan(ventas_prepared).any()
 # type(ventas_labels)
 ventas_labels.isna()
-#%%
-final_model = RandomForestRegressor(n_estimators=2000, max_features=48, verbose=10, n_jobs=8)
+
+final_model = MLPRegressor(verbose= 100)
 final_model.fit(ventas_prepared, ventas_labels)
 ventas_predictions = final_model.predict(ventas_prepared)
 tree_mse = mean_squared_error(ventas_labels, ventas_predictions)
@@ -90,18 +84,18 @@ print("Error: ",tree_rmse)
 # print("Best:", grid_search.best_params_)
 # final_model = grid_search.best_estimator_
 
-#%%
+
 X_test = strat_test_set.drop("Ventas",axis=1)
 y_test = strat_test_set["Ventas"].copy()
-#%%
+
 X_test_prepared = full_pipeline.transform(X_test)
 final_predictions = final_model.predict(X_test_prepared)
 final_mse = mean_squared_error(y_test, final_predictions)
 final_rmse = np.sqrt(final_mse)
 print(final_rmse)
 
-# %%
+
 from sklearn.metrics import mean_absolute_error
 final_mae = mean_absolute_error(y_test, final_predictions)
 final_mae
-# %%
+
