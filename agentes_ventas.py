@@ -61,26 +61,27 @@ ventas_prepared = num_pipeline.fit_transform(ventas)
 # type(ventas_labels)
 ventas_labels.isna()
 #%%
-forest_reg = RandomForestRegressor()
-forest_reg.fit(ventas_prepared, ventas_labels)
-ventas_predictions = forest_reg.predict(ventas_prepared)
+final_model = RandomForestRegressor(n_estimators=2000, max_features=48, verbose=10, n_jobs=4)
+final_model.fit(ventas_prepared, ventas_labels)
+ventas_predictions = final_model.predict(ventas_prepared)
 tree_mse = mean_squared_error(ventas_labels, ventas_predictions)
 tree_rmse = np.sqrt(tree_mse)
 print("Error: ",tree_rmse)
 
 # %%
-param_grid = [
-{'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
-{'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
-]
-grid_search = GridSearchCV(forest_reg, param_grid,cv=5, scoring='neg_mean_squared_error', return_train_score=True)
-grid_search.fit(ventas_prepared,ventas_labels)
-cvres = grid_search.cv_results_
-for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
-    print(np.sqrt(-mean_score), params)
-print("Best:", grid_search.best_params_)
+# param_grid = [
+# {'n_estimators': [3, 10, 30,100, 300], 'max_features': [2, 4, 6, 8, 10, 12]},
+# {'bootstrap': [False], 'n_estimators': [3, 10, 30], 'max_features': [2, 3, 4, 6]},
+# ]
+# grid_search = GridSearchCV(forest_reg, param_grid,cv=5, scoring='neg_mean_squared_error', return_train_score=True, verbose=10)
+# grid_search.fit(ventas_prepared,ventas_labels)
+# cvres = grid_search.cv_results_
+# for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
+#     print(np.sqrt(-mean_score), params)
+# print("Best:", grid_search.best_params_)
+# final_model = grid_search.best_estimator_
 
-final_model = grid_search.best_estimator_
+#%%
 X_test = strat_test_set.drop("Ventas",axis=1)
 y_test = strat_test_set["Ventas"].copy()
 #%%
