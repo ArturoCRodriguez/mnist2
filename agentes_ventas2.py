@@ -8,7 +8,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import OneHotEncoder
 from my_functions import DropColumns
-from my_functions import MakeCategorical
+from my_functions import ConvertNegativeToCero
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import RobustScaler
@@ -23,12 +23,13 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
 ventas = pd.read_csv("AgentesVentas8.csv")
 ventas.dropna(inplace=True)
-ventas = ventas.loc[ventas["MediaVisitasMismoDiaU10"] > 0,:]
-ventas["ventas_cat"] = pd.cut(ventas["MediaVentasMismoDiaU10"],bins= 10, labels=[1,2,3,4,5,6,7,8,9,10])
+# ventas = ventas.fillna(0)
+# ventas = ventas.loc[ventas["MediaVisitasMismoDiaU10"] > 0,:]
+ventas["ventas_cat"] = pd.cut(ventas["MediaVentasMismoDiaU6"],bins= 10, labels=[1,2,3,4,5,6,7,8,9,10])
 
-split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+split = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=42)
 for train_index, test_index in split.split(ventas,ventas["ventas_cat"]):
-    strat_train_set = ventas.iloc[train_index]
+    strat_train_set = ventas.iloc[train_index] # !!! IMPORTANTE USAR iloc. En caso contrario aparecen NaN
     strat_test_set = ventas.iloc[test_index]
 strat_test_set.loc[strat_test_set["Ventas"].isna(),:]
 
@@ -48,6 +49,7 @@ ventas_labels.isna().any()
 
 num_pipeline = Pipeline([
     ('attribs_adder', DropColumns()),
+    # ("to_zero",ConvertNegativeToCero()),
     ('imputer', SimpleImputer(strategy="median")),
     # ('categ',MakeCategorical()),
     ('std_scaler',RobustScaler()),
@@ -55,7 +57,7 @@ num_pipeline = Pipeline([
 attribs = ["BKAgente","Mes","Dia","DiaSemana","DiaAnio"]
 
 full_pipeline = ColumnTransformer([    
-    ("num",num_pipeline,ventas.columns),    
+    ("num",num_pipeline,ventas.drop(attribs,axis=1).columns),    
     ("cat",OneHotEncoder(),attribs),    
 ])
 ventas_prepared = full_pipeline.fit_transform(ventas)

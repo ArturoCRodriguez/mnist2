@@ -21,15 +21,18 @@ class DropColumns(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self 
     def transform(self, X, y=None):
-        X.drop(["Date","DiaMes","Objetivo","Tmin","Tmax","EsDiaLaboral"],axis=1, inplace = True)
+        X.drop(["VentasMismoDíaU1","VentasMismoDíaU2","VentasMismoDíaU3","VentasMismoDíaU4",
+        "VentasMismoDíaU5","VentasMismoDíaU6","VentasMismoDíaU7","VentasMismoDíaU8",
+        "VentasMismoDíaU9","VentasMismoDíaU10","VentasU1","VentasU2","VentasU3","VentasU4","VentasU5"
+        ,"VentasU6","VentasU7","VentasU8","VentasU9","VentasU10","Date","DiaMes","Objetivo","Tmin","Tmax","EsDiaLaboral"],axis=1, inplace = True)
         return X
-class MakeCategorical(BaseEstimator, TransformerMixin):
+class ConvertNegativeToCero(BaseEstimator, TransformerMixin):
     def fit(self, X, y = None):
         return self
     def transform(self, X, y = None):
-        attribs = ["BKAgente","Mes","Dia","DiaSemana","DiaAnio"]
-        encoder = OneHotEncoder(categories='auto')        
-        return encoder.fit_transform(X)
+        for col in X.columns:
+            X.loc[X[col] < 0] = 0
+        return X
     
 
         
