@@ -11,29 +11,25 @@ from sklearn.metrics import precision_score, recall_score
 from sklearn.metrics import confusion_matrix, precision_recall_curve, f1_score, roc_curve, roc_auc_score
 from sklearn.ensemble import RandomForestClassifier
 mnist = pd.read_csv("mnist_784_csv.csv")
-# print(mnist.head())
-# mnist = fetch_openml("mnist_784",version=1)
-# print(mnist.keys())
-
 X,y = mnist.drop("class",axis=1).to_numpy(), mnist["class"].copy().values
-# X,y = mnist["data"], mnist["target"]
-
 y = y.astype(np.uint8)
-# print(y[0])
-# some_digit = X.iloc[0,:]
-# some_digit_image = some_digit.values.reshape(28,28)
-# plt.imshow(some_digit_image, cmap = mpl.cm.get_cmap("binary"), interpolation="nearest") 
-# plt.axis("off") 
-# plt.show()
 X_train, X_test, y_train, y_test = X[:60000], X[60000:], y[:60000], y[60000:]
 y_train_5 = (y_train == 5)
 y_test_5 = (y_test == 5)
-# sgd_clf = SGDClassifier(random_state=42)
+sgd_clf = SGDClassifier(random_state=42)
 # sgd_clf.fit(X_train,y_train_5)
 # result = sgd_clf.predict(X_test)
 # accuracy = (result == y_test_5)
 # print(np.sum(accuracy == True)/y_test_5.shape[0])
-# result = cross_val_score(sgd_clf,X_train, y_train_5,cv=3, scoring="accuracy")
+# Devuelve la puntiación de la métrica de scoring para cada conjunto CV
+result = cross_val_score(sgd_clf,X_train, y_train_5,cv=3, scoring="recall")
+print(result)
+# Devuelve valores para cada elemento de X_train en función de method
+# "decision_function" hace que se devuelvan los valores de decisión calculados por el modelo
+# "predict" hace que se devuelvan los valores de la clase que se predice (en este caso True o False, que son las clases de y_train_5)
+y_scores = cross_val_predict(sgd_clf,X_train, y_train_5, cv=3, method="decision_function",n_jobs= 4)
+print(y_scores)
+
 # y_train_pred = cross_val_predict(sgd_clf,X_train, y_train_5,cv=3)
 # print(confusion_matrix(y_train_5,y_train_pred))
 # print("Precision: ",precision_score(y_train_5,y_train_pred))
@@ -55,7 +51,3 @@ y_test_5 = (y_test == 5)
 # plt.plot([0,1],[0,1],'k--')
 # plt.show()
 # print(roc_auc_score(y_train_5, y_scores))
-
-forest_clf = RandomForestClassifier(random_state=42)
-y_probas_forest = cross_val_predict(forest_clf,X_train, y_train_5, cv=3,method="predict_proba", n_jobs=4)
-print(y_probas_forest)
