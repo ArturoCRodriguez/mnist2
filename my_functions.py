@@ -33,6 +33,29 @@ class ConvertNegativeToCero(BaseEstimator, TransformerMixin):
         for col in X.columns:
             X.loc[X[col] < 0] = 0
         return X
+class ConvertNegativeToString(BaseEstimator, TransformerMixin):
+    def __init__(self, columns = []):
+        self.columns = columns
+    def fit(self, X, y = None):
+        return self
+    def transform(self, X, y = None):
+        columnas = self.columns
+        for col in columnas:
+            X[col] = X[col].apply(str)
+            X[col] = X[col].replace('-1','unk')
+        return X
     
-
+class Encoder(BaseEstimator, TransformerMixin):
+    def __init__(self, one_hot_encoder = OneHotEncoder()):
+        self.ohe = one_hot_encoder
+    def fit(self, X, y = None):
+        return self
+    def transform(self, X, y = None):
+        columnas = X.columns
+        for col in columnas:
+            X[col] = X[col].apply(str)
+            X[col] = X[col].replace('-1','unk')        
+        oencoder = self.ohe
+        X = oencoder.transform(X)
+        return X
         
