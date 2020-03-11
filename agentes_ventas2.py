@@ -48,50 +48,47 @@ ventas = ventas.drop("Ventas",axis=1)
 ventas_labels = strat_train_set["Ventas"].copy()
 
 # strat_train_set.loc[strat_train_set["Ventas"].isna(),:]
-# print(ventas.shape)
-# print(ventas_labels.shape)
-
-ventas_labels.isna().any()
-to_str_columns = ["BKAgente"]
+print("Ventas shape:",ventas.shape)
+print(ventas.info())
 num_pipeline = Pipeline([
     ('attribs_adder', DropColumns()),    
     ('imputer', SimpleImputer(strategy="median")),
     # ('categ',MakeCategorical()),
     ('std_scaler',RobustScaler()),
 ])
-attribs = ["BKAgente","Mes","Dia","DiaSemana","DiaAnio"]
+# attribs = ["BKAgente","Mes","Dia","DiaSemana","DiaAnio"]
+attribs = ["Mes","Dia","DiaSemana","DiaAnio"]
 # print(ventas.loc[ventas["BKAgente"] < 0,:])
-
+num_columns = ventas.drop(attribs,axis=1).columns
 full_pipeline = ColumnTransformer([     
-    ("num",num_pipeline,ventas.drop(attribs,axis=1).columns),    
+    ("num",num_pipeline,num_columns),    
     # ("cat",Encoder(one_hot_encoder=OneHotEncoder()),attribs),    
-    ("cat",OneHotEncoder(categories='auto'),attribs),    
+    ("cat",OneHotEncoder(categories='auto',handle_unknown='ignore'),attribs),    
 ])
 ventas_prepared = full_pipeline.fit_transform(ventas)
-print(ventas_prepared.shape)
-# np.isnan(ventas_prepared).any()
-# type(ventas_labels)
+print("ventas_prepared:", ventas_prepared.shape)
 ventas_labels.isna()
 
-final_model = MLPRegressor(verbose= 100, max_iter=180)
-final_model.fit(ventas_prepared, ventas_labels)
+# Training
+regressor = MLPRegressor()
+# final_model.fit(ventas_prepared, ventas_labels)
+param_grid = [
+{'solver': ["lbfgs"],'activation':["relu"], 'max_iter':[250], 'alpha': [0.01], 'learning_rate_init':[0.1]},
+]
+grid_search = GridSearchCV(regressor, param_grid,cv=5, scoring='neg_mean_squared_error', return_train_score=True, verbose=10, n_jobs=8)
+grid_search.fit(ventas_prepared,ventas_labels)
+cvres = grid_search.cv_results_
+for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
+    print(np.sqrt(-mean_score), params)
+print("Best:", grid_search.best_params_)
+final_model = grid_search.best_estimator_
+
+# 1st test
 ventas_predictions = final_model.predict(ventas_prepared)
 tree_mse = mean_squared_error(ventas_labels, ventas_predictions)
 tree_rmse = np.sqrt(tree_mse)
 print("Error: ",tree_rmse)
 
-# %%
-# param_grid = [
-# {'n_estimators': [3, 10, 30,100, 300], 'max_features': [2, 4, 6, 8, 10, 12]},
-# {'bootstrap': [False], 'n_estimators': [3, 10, 30], 'max_features': [2, 3, 4, 6]},
-# ]
-# grid_search = GridSearchCV(forest_reg, param_grid,cv=5, scoring='neg_mean_squared_error', return_train_score=True, verbose=10)
-# grid_search.fit(ventas_prepared,ventas_labels)
-# cvres = grid_search.cv_results_
-# for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
-#     print(np.sqrt(-mean_score), params)
-# print("Best:", grid_search.best_params_)
-# final_model = grid_search.best_estimator_
 
 
 X_test = strat_test_set.drop("Ventas",axis=1)
