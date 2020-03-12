@@ -58,4 +58,7 @@ class Encoder(BaseEstimator, TransformerMixin):
         oencoder = self.ohe
         X = oencoder.transform(X)
         return X
+def get_categories(X, attribs = []):
+    result = []
+    return result
         
