@@ -44,7 +44,7 @@ sgd_clf.fit(X_train,y_train_5)
 # print("Precision: ",precision_score(y_train_5,y_train_pred))
 # print("Recall: ", recall_score(y_train_5,y_train_pred))
 # print("F1 Score: ", f1_score(y_train_5,y_train_pred))
-y_scores = cross_val_predict(sgd_clf,X_train, y_train_5, cv=3, method="decision_function",n_jobs= 4)
+y_scores = cross_val_predict(sgd_clf,X_train, y_train_5, cv=3, method="decision_function",n_jobs= 8)
 # pd.set_option('display.max_rows', None)
 # np.set_printoptions(threshold=9999999)
 
@@ -62,7 +62,9 @@ fpr, tpr, thresholds = roc_curve(y_train_5, y_scores)
 # print(roc_auc_score(y_train_5, y_scores))
 
 forest_clf = RandomForestClassifier(random_state=42)
-y_probas_forest = cross_val_predict(forest_clf,X_train, y_train_5, cv=3,method="predict_proba", n_jobs=4)
+y_probas_forest = cross_val_predict(forest_clf,X_train, y_train_5, cv=3,method="predict_proba", n_jobs=8)
+y_pred = cross_val_predict(forest_clf,X_train, y_train_5, cv=3, method="predict",n_jobs= 4)
+
 print(y_probas_forest)
 y_scores_forest = y_probas_forest[:,1]
 fpr_forest, tpr_forest, threshold_forest = roc_curve(y_train_5, y_scores_forest)
@@ -71,3 +73,7 @@ plt.plot(fpr, tpr, "b:", label="SGD")
 plot_roc_curve(fpr_forest, tpr_forest, "Random Forest")
 plt.legend(loc= "lower right")
 plt.show()
+
+print(roc_auc_score(y_train_5,y_scores_forest))
+print(precision_score(y_train_5, y_pred))
+print(recall_score(y_train_5, y_pred))
