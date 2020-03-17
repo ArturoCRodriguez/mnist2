@@ -11,6 +11,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import KNNImputer
 from sklearn.impute import SimpleImputer
 from sklearn.base import BaseEstimator, TransformerMixin
+from lightgbm import LGBMClassifier
 here = os.path.dirname(os.path.abspath(__file__))
 
 train_data = pd.read_csv( os.path.join(here,"train.csv"))
@@ -44,14 +45,14 @@ class Prueba(BaseEstimator,TransformerMixin):
 num_pipeline = Pipeline(
     [
         # ("columns",DropColumns(cat_columns)),
-        ('imputer',  SimpleImputer(strategy="mean")),
+        ('imputer',  KNNImputer()),
     ]
 )
 cat_pipeline = Pipeline(
     [
         # ("columns",DropColumns(num_columns)),
         ('imputer_cat', SimpleImputer( strategy="most_frequent")),
-        ('prueba', Prueba()),
+        # ('prueba', Prueba()),
         ("cat3",OneHotEncoder(handle_unknown="ignore", sparse= False))
     ]
 )
@@ -72,7 +73,11 @@ X_train_prepared = full_pipeline.fit_transform(X_train)
 
 
 #%%
-clf = RandomForestClassifier(random_state=42)
+clf = RandomForestClassifier(random_state=42,n_estimators=200, n_jobs=8)
+clf2 = LGBMClassifier(max_depth=100)
+clf2.fit(X_train_prepared,y_train)
 clf.fit(X_train_prepared, y_train)
 y_pred = clf.predict(X_train_prepared)
+y_pred2 = clf2.predict(X_train_prepared)
 print(roc_auc_score(y_train,y_pred))
+print(roc_auc_score(y_train,y_pred2))
