@@ -24,6 +24,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
 from sklearn.externals import joblib
+from lightgbm import LGBMRegressor
 
 ventas = pd.read_csv("AgentesVentas8.csv")
 ventas.dropna(inplace=True)
@@ -71,10 +72,14 @@ print("ventas_prepared:", ventas_prepared.shape)
 ventas_labels.isna()
 
 # Training
-regressor = DecisionTreeRegressor(random_state= 42)
+# regressor = DecisionTreeRegressor(random_state= 42)
+regressor = LGBMRegressor(random_state=42)
 # final_model.fit(ventas_prepared, ventas_labels)
+# param_grid = [
+# {'criterion': ["mae"]}
+# ]
 param_grid = [
-{'criterion': ["mae"]}
+{'n_estimators': [100,200]}
 ]
 grid_search = GridSearchCV(regressor, param_grid,cv=5, scoring='neg_mean_absolute_error', return_train_score=True, verbose=10, n_jobs=8)
 grid_search.fit(ventas_prepared,ventas_labels)
