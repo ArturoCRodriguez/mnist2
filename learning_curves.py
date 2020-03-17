@@ -14,9 +14,12 @@ def plot_learning_curves(model, X, y):
         model.fit(X_train[:m], y_train[:m])
         y_train_predict = model.predict(X_train[:m])
         y_val_predict = model.predict(X_val)
-        train_errors.append()
+        train_errors.append(mean_squared_error(y_train[:m],y_train_predict))
+        val_errors.append(mean_squared_error(y_val,y_val_predict))
+    plt.plot(np.sqrt(train_errors),"r-+",linewidth=2,label="train")
+    plt.plot(np.sqrt(val_errors),"b-",linewidth=3,label="val")
 
-m = 100
+m = 1000
 X = 6 * np.random.rand(m,1) - 3
 y = 0.5 * X**2 + X + 2 + np.random.randn(m,1)
 
@@ -37,3 +40,9 @@ b = lin_reg.predict(a_poly)
 plt.plot(X,y,'bo')
 plt.plot(a,b,'r')
 plt.show()
+
+#%%
+model = LinearRegression()
+plot_learning_curves(model,X,y)
+
+# %%

@@ -39,4 +39,6 @@ full_pipeline = ColumnTransformer([
 ])
 
 ventas = full_pipeline.fit_transform(ventas)
+regressor = MLPRegressor(random_state=42, max_iter=)
+
 print((ventas.toarray()))
