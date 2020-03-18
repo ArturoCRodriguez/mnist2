@@ -109,3 +109,7 @@ final_mae = mean_absolute_error(y_test, final_predictions)
 final_rmse = np.sqrt(final_mse)
 print("final_rmse: ",final_rmse)
 print("final_mae", final_mae)
+
+# Save the model
+joblib.dump(full_pipeline,"agentes_pipeline.joblib")
+joblib.dump(final_model, "agentes_model.pkl")
