@@ -79,7 +79,7 @@ regressor = LGBMRegressor(random_state=42)
 # {'criterion': ["mae"]}
 # ]
 param_grid = [
-{'n_estimators': [100,200]}
+{'n_estimators': [270], 'learning_rate':[0.08,0.1]}
 ]
 grid_search = GridSearchCV(regressor, param_grid,cv=5, scoring='neg_mean_absolute_error', return_train_score=True, verbose=10, n_jobs=8)
 grid_search.fit(ventas_prepared,ventas_labels)
@@ -109,3 +109,7 @@ final_mae = mean_absolute_error(y_test, final_predictions)
 final_rmse = np.sqrt(final_mse)
 print("final_rmse: ",final_rmse)
 print("final_mae", final_mae)
+
+# Save the model
+joblib.dump(full_pipeline,"agentes_pipeline.joblib")
+joblib.dump(final_model, "agentes_model.pkl")
