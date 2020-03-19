@@ -62,4 +62,5 @@ class Encoder(BaseEstimator, TransformerMixin):
 def get_categories(X, attribs = []):
     result = []
     return result
+
         
