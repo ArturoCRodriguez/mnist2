@@ -15,7 +15,8 @@ from sklearn.model_selection import GridSearchCV
 from lightgbm import LGBMClassifier
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.neural_network import MLPClassifier
-from titanic_functions import plot_learning_curves,get_num_of_cabins,get_real_fare,get_deck,DropColumns,AddFeaturesFromCat,GetDeck, print_results
+from sklearn.svm import SVC
+from titanic_functions import plot_learning_curves,get_num_of_cabins,get_real_fare,get_deck,DropColumns,AddFeaturesFromCat,GetDeck, print_results,Combine
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -30,47 +31,39 @@ train_data.loc[:,["Ticket","Fare","Cabin","Pclass", "Name","Survived"]].sort_val
 
 
 #%%
-
+columns_to_drop = ["PassengerId","Name","Cabin","Embarked"]
 num_columns = ["Age","SibSp","Parch","Fare","Pclass"]
-cat_columns = ["Sex","Ticket"]
-cat_columns2 = ["PassengerId","Name","Embarked"]
-cat_columns3 = ["Fare","Cabin"]
-cat_columns4 = ["Cabin"]
-
+cat_columns_stay = ["Sex","Ticket"]
+cat_columns_to_transform = ["Sex","Ticket"]
 
 num_pipeline = Pipeline(
     [
         # ("columns",DropColumns(cat_columns)),
         ('imputer',  SimpleImputer(strategy="median")),
-        ('std_scaler',RobustScaler(1,99)),
-        
+        ('std_scaler',RobustScaler(1,99)),        
     ]
 )
-cat_pipeline = Pipeline(
-    [     
-        ("columns",DropColumns(cat_columns2))   
-        # ('imputer_cat', SimpleImputer( strategy="most_frequent")),        
-        # ("cat3",OneHotEncoder(handle_unknown="ignore", sparse= False))
+cat_stay_pipeline = Pipeline(
+    [          
+        ('imputer_cat', SimpleImputer( strategy="most_frequent")),        
+        ("cat3",OneHotEncoder(handle_unknown="ignore", sparse= False))
     ]
 )
-cat_pipeline2 = Pipeline(
+cat_transform_pipeline = Pipeline(
     [        
-        ('cabins', AddFeaturesFromCat()),        
-    ]
-)
-cat_pipeline3 = Pipeline(
-    [        
-        ('decks', GetDeck()),        
+        ('decks', Combine()),        
         ("decks2",OneHotEncoder(handle_unknown="ignore", sparse= False))
     ]
 )
-full_pipeline = ColumnTransformer([
+transformer = ColumnTransformer([
     ("num",num_pipeline,num_columns),
-    ("add",cat_pipeline2,cat_columns3),    
-    # ("decks",cat_pipeline3,cat_columns4),    
-    ("cat1",cat_pipeline,cat_columns2),    
-    ("cat2",OneHotEncoder(handle_unknown="ignore", sparse= False),cat_columns),
-    # ("cat3",OneHotEncoder(handle_unknown="ignore", sparse= False),cat_columns2),
+    ("cat_stay",cat_stay_pipeline,cat_columns_stay),
+    # ("cat_transform",cat_transform_pipeline, cat_columns_to_transform)
+])
+
+full_pipeline = Pipeline([
+    ("1",DropColumns(columns_to_drop)),
+    ("2",transformer)
 ]) 
 # train_data.drop(["PassengerId","Name"], axis= 1, inplace= True)
 #%%
@@ -93,10 +86,10 @@ X_val_prepared = full_pipeline.transform(X_val)
 #%%
 clf = RandomForestClassifier(random_state=42, n_jobs=4)
 clf2 = LGBMClassifier(n_jobs=4)
-clf3 = MLPClassifier(random_state=43, max_iter=600)
-
+clf3 = MLPClassifier(random_state=42,solver='lbfgs')
 params = [{'n_estimators':[10,20,30,40,50,70,100,250,260,270,280,290,300,320,350,400]}]
-grid = GridSearchCV(estimator = clf, param_grid= params, scoring='accuracy',n_jobs=4,cv=3, verbose=100)
+# params = [{'max_iter':[100,200,270,300,400]}]
+grid = GridSearchCV(estimator = clf, param_grid= params, scoring='accuracy',n_jobs=4,cv=5, verbose=100)
 grid.fit(X_train_prepared,y_train)
 cvres = grid.cv_results_
 for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
