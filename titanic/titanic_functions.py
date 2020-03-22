@@ -6,6 +6,25 @@ import numpy as np
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score, log_loss
 from sklearn.base import BaseEstimator, TransformerMixin
 
+class AgeBins(BaseEstimator, TransformerMixin):
+    def __init__(self, ages = [10,20,40,60,120]):
+        self.ages = ages
+    def fit(self, X,y= None):
+        return self
+    def transform(self, X, y= None):
+        ages_array = np.array(self.ages)
+        X["age_range"] = X["Age"].apply(lambda x: "age_"+str(ages_array[np.argmax(ages_array > x)]))
+        X.drop("Age",axis=1, inplace=True)
+        return X    
+class CalculateFamilySize(BaseEstimator, TransformerMixin):
+    def fit(self, X, y= None):
+        return self
+    def transform(self, X, y= None):        
+        X["FamilySize"] = 1 + X["SibSp"] + X["Parch"]
+        # X.drop(["SibSp","Parch"],axis= 1, inplace= True)
+        X["IsAlone"] = X["FamilySize"].apply(lambda x: 1 if x > 0 else 1)
+        # X.drop(["FamilySize"],axis= 1, inplace= True)
+        return X
 class DropColumns(BaseEstimator,TransformerMixin):
     def __init__(self, columns = []):
         self.columns = columns
@@ -36,6 +55,7 @@ class GetDeck(BaseEstimator,TransformerMixin):
         return self
     def transform(self, X, y= None):                
         X["deck"] = X.apply(get_deck, axis= 1)
+        X["HasCabin"] = X["Cabin"].apply(lambda c: 0 if c is np.nan or c is None else 1)
         X = X.drop(["Cabin"], axis= 1)
         return X
 class Combine(BaseEstimator,TransformerMixin):    
@@ -73,7 +93,7 @@ def get_real_fare(data):
         return data["Fare"] / data["num_of_cabins"]
 def get_deck(data):    
     if(isinstance(data["Cabin"],float)):
-        return 'T'
+        return 'G'
     else:
         cabin = data["Cabin"]
         if 'A' in cabin:
@@ -90,7 +110,7 @@ def get_deck(data):
             return 'F'
         elif 'G' in cabin:
             return 'G'
-        return 'T'
+        return 'G'
 def print_results(model_name,y_true, y_predict):
     print("{} results:".format(model_name))
     # auc = roc_auc_score(y_true,y_predict)
