@@ -2,6 +2,7 @@ from sklearn import datasets
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from matplotlib import pyplot as plt
+
 iris = datasets.load_iris()
 # print(list(iris.keys()))
 X = iris["data"][:,3:]
