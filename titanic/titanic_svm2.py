@@ -6,7 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score, log_loss
-from sklearn.preprocessing import OneHotEncoder,RobustScaler, Normalizer, OrdinalEncoder, MinMaxScaler
+from sklearn.preprocessing import OneHotEncoder,RobustScaler, Normalizer, OrdinalEncoder, MinMaxScaler, StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import KNNImputer
@@ -115,13 +115,14 @@ y_test_survived = test_data_survived["Survived"]
 X_test = test_data
 #%%
 print(X_train.info())
-columns_to_drop = ["Embarked","HasCarer","FamiliSize","PassengerId","Name","Cabin","Fare_cat","HasCabin","Title","SibSp","Deck","IsAlone"]
+columns_to_drop = ["Embarked","HasCarer","FamiliSize","PassengerId","Name","Cabin","Fare_cat","HasCabin","Title","SibSp","IsAlone"]
 num_columns = ["Age","Fare","Parch"]
-cat_columns_stay = ["Pclass","Sex","Ticket"]
+cat_columns_stay = ["Pclass","Sex","Ticket","Deck"]
 
 num_pipeline = Pipeline(
     [
-        # ('std_scaler',RobustScaler(1,99)),           
+        # ('std_scaler',StandardScaler()),           
+        # ('std_scaler',RobustScaler()),           
         ('std_scaler',MinMaxScaler()),           
     ]
 )
@@ -149,7 +150,8 @@ clf3 = MLPClassifier(random_state=42)
 clf4 = AdaBoostClassifier(random_state=42)
 clf5 = xgb.XGBClassifier(random_state=42)
 clf6 = SVC(kernel="rbf",random_state=42)
-params = [{"gamma":[0.001,0.003,0.01,0.03,0.05,0.07,0.1,0.15,0.2,0.3,1,3,10], "C":[0.1,0.3,1,3,10,30,80,90,100,110,150,200,300,500,1000]}]
+# params = [{"gamma":[0.001,0.003,0.01,0.03,0.05,0.07,0.1,0.15,0.2,0.3,1,3,10], "C":[0.1,0.3,1,3,10,30,80,90,100,110,150,200,300,500,1000]}]
+params = [{"gamma":[0.001,0.003,0.01,0.07,0.1,0.3,1,3], "C":[0.1,0.3,1,3,10,50,100,500,1000]}]
 # params = [{
 #     # 'max_depth': [10, 30,  50, 70, 90, None],
 #     # 'criterion':["entropy","gini"],
@@ -160,7 +162,7 @@ params = [{"gamma":[0.001,0.003,0.01,0.03,0.05,0.07,0.1,0.15,0.2,0.3,1,3,10], "C
 # params = [
 #     {'solver': ["lbfgs","adam"],'activation':["relu","logistic"], 'max_iter':[100,200,270,300,400], 'alpha': [0.01,0.03,0.1,0.3], 'learning_rate_init':[0.01,0.03,0.1,0.3]}
 # ]
-grid = GridSearchCV(estimator = clf6, param_grid= params, scoring='roc_auc',n_jobs=-1,cv=8, verbose=100)
+grid = GridSearchCV(estimator = clf6, param_grid= params, scoring='f1',n_jobs=-1,cv=20, verbose=100)
 grid.fit(X_train_prepared,y_train)
 cvres = grid.cv_results_
 for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
@@ -173,6 +175,8 @@ y_test_survived_pred = final_model.predict(X_test_survived_prepared)
 print("Best accuracy:", grid.best_score_)
 print("Train accuracy: ", accuracy_score(y_train,y_train_pred))
 print("Final accuracy: ", accuracy_score(y_test_survived,y_test_survived_pred))
+print("Final f1: ", f1_score(y_test_survived,y_test_survived_pred))
+print("Final roc: ", roc_auc_score(y_test_survived,y_test_survived_pred))
 
 # Submission
 
