@@ -4,7 +4,7 @@ import math
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, VotingClassifier
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score, log_loss
 from sklearn.preprocessing import OneHotEncoder,RobustScaler, Normalizer, OrdinalEncoder, MinMaxScaler, StandardScaler
 from sklearn.pipeline import Pipeline
@@ -67,8 +67,6 @@ test_data['Title'] = test_data['Title'].replace('Mme','Mrs')
 test_data_survived['Title'] = test_data_survived['Title'].replace('Mlle','Miss')
 test_data_survived['Title'] = test_data_survived['Title'].replace('Ms','Miss')
 test_data_survived['Title'] = test_data_survived['Title'].replace('Mme','Mrs')
-
-
 #%%
 mean_ages_by_title = train_data.groupby("Title")["Age"].mean()
 std_age_by_title = train_data.groupby("Title")["Age"].std()
@@ -109,9 +107,6 @@ test_data_survived["Embarked"] = test_data_survived["Embarked"].apply(lambda x: 
 train_data["Deck"] = train_data.apply(get_deck,axis=1)
 test_data["Deck"] = test_data.apply(get_deck,axis=1)
 test_data_survived["Deck"] = test_data_survived.apply(get_deck,axis=1)
-#%%
-print(train_data[["HasCabin","Survived"]].groupby(["HasCabin"],as_index=False).mean())
-print(test_data_survived[["HasCabin","Survived"]].groupby(["HasCabin"],as_index=False).mean())
 #%%
 X_train = train_data.drop("Survived",axis=1)
 y_train = train_data["Survived"]
@@ -154,9 +149,10 @@ clf2 = LGBMClassifier(n_jobs=4)
 clf3 = MLPClassifier(random_state=42)
 clf4 = AdaBoostClassifier(random_state=42)
 clf5 = xgb.XGBClassifier(random_state=42)
-clf6 = SVC(kernel="rbf",random_state=42)
+clf6 = SVC(kernel="rbf",random_state=42, probability=True)
+eclf = VotingClassifier(estimators=[('clf',clf),('clf6',clf6),('clf5',clf5)], n_jobs= -1,voting='soft')
 # params = [{"gamma":[0.001,0.003,0.01,0.03,0.05,0.07,0.1,0.15,0.2,0.3,1,3,10], "C":[0.1,0.3,1,3,10,30,80,90,100,110,150,200,300,500,1000]}]
-params = [{"gamma":[0.001,0.003,0.01,0.03,0.07,0.1,0.15,0.2], "C":[10,30,50,70,75,80,90]}]
+# params = [{"gamma":[0.001,0.003,0.01,0.07,0.1,0.3,1,3], "C":[0.1,0.3,1,3,10,50,100,500,1000]}]
 # params = [{
 #     # 'max_depth': [10, 30,  50, 70, 90, None],
 #     # 'criterion':["entropy","gini"],
@@ -167,7 +163,8 @@ params = [{"gamma":[0.001,0.003,0.01,0.03,0.07,0.1,0.15,0.2], "C":[10,30,50,70,7
 # params = [
 #     {'solver': ["lbfgs","adam"],'activation':["relu","logistic"], 'max_iter':[100,200,270,300,400], 'alpha': [0.01,0.03,0.1,0.3], 'learning_rate_init':[0.01,0.03,0.1,0.3]}
 # ]
-grid = GridSearchCV(estimator = clf6, param_grid= params, scoring='roc_auc',n_jobs=-1,cv=20, verbose=100)
+params = [{'clf__n_estimators':[10,30,100,300], 'clf6__gamma':[0.001,0.003,0.01,0.03,0.1,0.3],'clf6__C':[0.01,0.03,0.1,0.3],'clf5__n_estimators':[10,30,100,300]}]
+grid = GridSearchCV(estimator = eclf, param_grid= params, scoring='roc_auc',n_jobs=-1,cv=20, verbose=100)
 grid.fit(X_train_prepared,y_train)
 cvres = grid.cv_results_
 for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
@@ -188,5 +185,10 @@ print("Final f1: ", f1_score(y_real_join,y_pred_join))
 print("Final roc: ", roc_auc_score(y_real_join,y_pred_join))
 
 # Submission
+
+
+
+
+
 result = test_data.loc[:,["PassengerId","Survived"]]
 result.to_csv(os.path.join(here,"result.csv"),index = False)

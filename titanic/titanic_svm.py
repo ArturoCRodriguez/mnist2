@@ -169,13 +169,27 @@ print("Best:", grid.best_params_)
 final_model = grid.best_estimator_
 y_train_pred = final_model.predict(X_train_prepared)
 y_pred = final_model.predict(X_test_prepared)
-y_test_survived_pred = final_model.predict(X_test_survived_prepared)
+test_data["Survived"] = y_pred
+df_join = test_data_survived.join(test_data.loc[:,["PassengerId","Survived"]].set_index('PassengerId'),on='PassengerId',lsuffix='_surv',rsuffix='_test')
+y_pred_join = df_join["Survived_test"]
+y_real_join = df_join["Survived_surv"]
+# y_test_survived_pred = final_model.predict(X_test_survived_prepared)
 print("Best accuracy:", grid.best_score_)
 print("Train accuracy: ", accuracy_score(y_train,y_train_pred))
-print("Final accuracy: ", accuracy_score(y_test_survived,y_test_survived_pred))
+print("Final accuracy: ", accuracy_score(y_real_join,y_pred_join))
+print("Final f1: ", f1_score(y_real_join,y_pred_join))
+print("Final roc: ", roc_auc_score(y_real_join,y_pred_join))
 
 # Submission
-
-test_data["Survived"] = y_pred
 result = test_data.loc[:,["PassengerId","Survived"]]
 result.to_csv(os.path.join(here,"result.csv"),index = False)
+# y_test_survived_pred = final_model.predict(X_test_survived_prepared)
+# print("Best accuracy:", grid.best_score_)
+# print("Train accuracy: ", accuracy_score(y_train,y_train_pred))
+# print("Final accuracy: ", accuracy_score(y_test_survived,y_test_survived_pred))
+
+# # Submission
+
+# test_data["Survived"] = y_pred
+# result = test_data.loc[:,["PassengerId","Survived"]]
+# result.to_csv(os.path.join(here,"result.csv"),index = False)

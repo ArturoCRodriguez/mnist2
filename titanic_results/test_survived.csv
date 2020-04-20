@@ -7,7 +7,7 @@ PassengerId,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked,Survived
 897,3,"Svensson, Mr. Johan Cervin",male,14,0,0,7538,9.225,,S,1
 898,3,"Connolly, Miss. Kate",female,30,0,0,330972,7.6292,,Q,1
 899,2,"Caldwell, Mr. Albert Francis",male,26,1,1,248738,29,,S,1
-900,3,"Abrahim, Mrs. Joseph (Sophie Halaut Easu)",female,18,0,0,2657,7.2292,,C,0
+900,3,"Abrahim, Mrs. Joseph (Sophie Halaut Easu)",female,18,0,0,2657,7.2292,,C,1
 901,3,"Davies, Mr. John Samuel",male,21,2,0,A/4 48871,24.15,,S,0
 902,3,"Ilieff, Mr. Ylio",male,,0,0,349220,7.8958,,S,0
 903,1,"Jones, Mr. Charles Cresson",male,46,0,0,694,26,,S,0
@@ -89,13 +89,13 @@ PassengerId,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked,Survived
 979,3,"Badman, Miss. Emily Louisa",female,18,0,0,A/4 31416,8.05,,S,1
 980,3,"O'Donoghue, Ms. Bridget",female,,0,0,364856,7.75,,Q,0
 981,2,"Wells, Master. Ralph Lester",male,2,1,1,29103,23,,S,1
-982,3,"Dyker, Mrs. Adolf Fredrik (Anna Elisabeth Judith Andersson)",female,22,1,0,347072,13.9,,S,0
+982,3,"Dyker, Mrs. Adolf Fredrik (Anna Elisabeth Judith Andersson)",female,22,1,0,347072,13.9,,S,1
 983,3,"Pedersen, Mr. Olaf",male,,0,0,345498,7.775,,S,0
-984,1,"Davidson, Mrs. Thornton (Orian Hays)",female,27,1,2,F.C. 12750,52,B71,S,0
+984,1,"Davidson, Mrs. Thornton (Orian Hays)",female,27,1,2,F.C. 12750,52,B71,S,1
 985,3,"Guest, Mr. Robert",male,,0,0,376563,8.05,,S,0
 986,1,"Birnbaum, Mr. Jakob",male,25,0,0,13905,26,,C,0
 987,3,"Tenglin, Mr. Gunnar Isidor",male,25,0,0,350033,7.7958,,S,1
-988,1,"Cavendish, Mrs. Tyrell William (Julia Florence Siegel)",female,76,1,0,19877,78.85,C46,S,0
+988,1,"Cavendish, Mrs. Tyrell William (Julia Florence Siegel)",female,76,1,0,19877,78.85,C46,S,1
 989,3,"Makinen, Mr. Kalle Edvard",male,29,0,0,STON/O 2. 3101268,7.925,,S,0
 990,3,"Braf, Miss. Elin Ester Maria",female,20,0,0,347471,7.8542,,S,0
 991,3,"Nancarrow, Mr. William Henry",male,33,0,0,A./5. 3338,8.05,,S,0
@@ -120,7 +120,7 @@ PassengerId,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked,Survived
 1010,1,"Beattie, Mr. Thomson",male,36,0,0,13050,75.2417,C6,C,0
 1011,2,"Chapman, Mrs. John Henry (Sara Elizabeth Lawry)",female,29,1,0,SC/AH 29037,26,,S,0
 1012,2,"Watt, Miss. Bertha J",female,12,0,0,C.A. 33595,15.75,,S,1
-1013,3,"Kiernan, Mr. John",male,,1,0,367227,7.75,,Q,1
+1013,3,"Kiernan, Mr. John",male,,1,0,367227,7.75,,Q,0
 1014,1,"Schabert, Mrs. Paul (Emma Mock)",female,35,1,0,13236,57.75,C28,C,1
 1015,3,"Carver, Mr. Alfred John",male,28,0,0,392095,7.25,,S,0
 1016,3,"Kennedy, Mr. John",male,,0,0,368783,7.75,,Q,1
@@ -202,7 +202,7 @@ PassengerId,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked,Survived
 1092,3,"Murphy, Miss. Nora",female,,0,0,36568,15.5,,Q,1
 1093,3,"Danbom, Master. Gilbert Sigvard Emanuel",male,0.33,0,2,347080,14.4,,S,0
 1094,1,"Astor, Col. John Jacob",male,47,1,0,PC 17757,227.525,C62 C64,C,0
-1095,2,"Quick, Miss. Winifred Vera",female,8,1,1,26360,26,,S,0
+1095,2,"Quick, Miss. Winifred Vera",female,8,1,1,26360,26,,S,1
 1096,2,"Andrew, Mr. Frank Thomas",male,25,0,0,C.A. 34050,10.5,,S,0
 1097,1,"Omont, Mr. Alfred Fernand",male,,0,0,F.C. 12998,25.7417,,C,1
 1098,3,"McGowan, Miss. Katherine",female,35,0,0,9232,7.75,,Q,0
@@ -217,7 +217,7 @@ PassengerId,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked,Survived
 1107,1,"Head, Mr. Christopher",male,42,0,0,113038,42.5,B11,S,0
 1108,3,"Mahon, Miss. Bridget Delia",female,,0,0,330924,7.8792,,Q,0
 1109,1,"Wick, Mr. George Dennick",male,57,1,1,36928,164.8667,,S,0
-1110,1,"Widener, Mrs. George Dunton (Eleanor Elkins)",female,50,1,1,113503,211.5,C80,C,0
+1110,1,"Widener, Mrs. George Dunton (Eleanor Elkins)",female,50,1,1,113503,211.5,C80,C,1
 1111,3,"Thomson, Mr. Alexander Morrison",male,,0,0,32302,8.05,,S,0
 1112,2,"Duran y More, Miss. Florentina",female,30,1,0,SC/PARIS 2148,13.8583,,C,1
 1113,3,"Reynolds, Mr. Harold J",male,21,0,0,342684,8.05,,S,0
